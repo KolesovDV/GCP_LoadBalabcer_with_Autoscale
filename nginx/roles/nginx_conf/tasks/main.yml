@@ -1,0 +1,32 @@
+---
+- name: Remove default nginx config
+  file:
+    path: /etc/nginx/site-enabled/default
+    state: absent
+  notify: restart nginx
+
+
+- name: Setting nginx configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    force: yes
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart nginx
+  tags:
+  - nginx_conf_web
+
+
+- name: Setting nginx LB  configuration
+  template:
+    src: nginxlb.conf.j2
+    dest: /etc/nginx/nginx.conf
+    force: yes
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart nginx
+  tags:
+  - nginx_conf_lb

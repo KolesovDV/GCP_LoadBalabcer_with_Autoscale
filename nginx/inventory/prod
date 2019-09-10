@@ -1,0 +1,2 @@
+[web]
+35.232.54.159 ansible_user=devopbyrebrain_gmail_com ansible_ssh_private_key_file=devopbyrebrain_gmail_com

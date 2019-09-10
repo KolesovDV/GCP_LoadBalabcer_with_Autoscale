@@ -1,0 +1,23 @@
+---
+
+- name: Create virtual hosts for ssl
+  template:
+   src: site_ssl.j2
+   dest: '/etc/nginx/sites-available/{{ item }}'
+   owner: root
+   group: root
+   mode: '0644'
+  with_items: "{{ nginx_site_name }}"
+  notify: restart nginx
+
+- name: Create symbolic link
+  file:
+   src:  /etc/nginx/sites-available/{{ item }}
+   dest: /etc/nginx/sites-enabled/{{ item }}
+   state: link
+   owner: root
+   group: root
+   mode: '0644'
+  with_items: "{{ nginx_site_name }}"
+  notify: restart nginx
+

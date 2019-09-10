@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tags: [ nginx_conf_lb , lbconf ]
+  roles:
+  - nginx
+  - nginx_conf
+  - vhost
+  - ssl_cert_letsencrypt

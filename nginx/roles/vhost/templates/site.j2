@@ -1,0 +1,15 @@
+server {
+        listen {{nginx_http_port}} ;
+
+        root {{nginx_root_path}}/{{item}} ;
+        {% for file in nginx_start_file %}
+        {{file}}{% endfor %};
+        server_name {{item}}.{{nginx_dns_name}} ;
+
+        location / {
+             try_files $uri $uri/ =404;
+        }
+
+
+}
+

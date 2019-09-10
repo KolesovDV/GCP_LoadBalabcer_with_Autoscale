@@ -1,0 +1,7 @@
+---
+
+nginx_root_path: /var/www
+#nginx_site_name: ['Dima','Kolesov']
+nginx_site_name: ['dima']
+nginx_https_port: 443
+    

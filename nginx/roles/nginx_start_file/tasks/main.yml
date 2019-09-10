@@ -1,0 +1,8 @@
+---
+
+- name: Setting html file
+  template: src=html.conf.j2 dest={{ nginx_root_path }}/{{item}}/index.html owner=root group=root mode=0644
+  with_items: "{{ nginx_site_name }}"
+  notify: restart nginx
+
+

@@ -1,0 +1,10 @@
+---
+- hosts: web
+  become: yes
+  gather_facts: yes
+  roles:
+  - nginx
+  - nginx_conf
+  - vhost
+  - nginx_start_file
+

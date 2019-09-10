@@ -1,0 +1,16 @@
+---
+
+- name: Create virtual hosts for http
+  template:
+   src: http_conf.j2
+   dest: '/etc/nginx/sites-available/{{ item }}'
+   owner: root
+   group: root
+   mode: '0644'
+  with_items: "{{ nginx_site_name }}"
+  notify: restart nginx
+
+- name : reload nginx
+  service:
+   name: nginx
+   state: reloaded
