@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: lb
   become: yes
   gather_facts: yes
   tags: [ nginx_conf_lb , lbconf ]

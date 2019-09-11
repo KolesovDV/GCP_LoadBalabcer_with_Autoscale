@@ -1,1 +1,4 @@
 [lb]
+34.67.166.130 ansible_user=devopbyrebrain_gmail_com ansible_ssh_private_key_file=/root/.ssh/devopbyrebrain_gmail_com
+34.67.90.102 ansible_user=devopbyrebrain_gmail_com ansible_ssh_private_key_file=/root/.ssh/devopbyrebrain_gmail_com
+34.67.166.130 ansible_user=devopbyrebrain_gmail_com ansible_ssh_private_key_file=/root/.ssh/devopbyrebrain_gmail_com

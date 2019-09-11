@@ -26,13 +26,13 @@ variable "ssh_pr_key_filepath" {
 
 variable "web_domains"{
          type = "list"
-         default = ["dimank"]
+         default = ["dimank"]#, "dimankv"]
 }
 
 
 variable "lb_domains"{
          type = "list"
-         default = ["lbdimavsite"]
+         default = ["loadbvsite"]#,"lbstack"]
 }
 
 
@@ -69,18 +69,20 @@ variable "lb_domains"{
 
  resource "aws_route53_record" "www" {
 
-  count = "${length(var.lb_domains)}"
+  count   = "${length(var.lb_domains)}"
   zone_id =  data.aws_route53_zone.rebrain.id #"${var.aws_zoneid}"
   name    =  "${element(var.lb_domains, count.index)}.devops.rebrain.srwx.net"
   type    = "A"
   ttl     = "300"
-  records = ["${google_compute_instance.lb_instance.network_interface[count.index].access_config[count.index].nat_ip}" ,]
+  records = ["${google_compute_instance.lb_instance[count.index].network_interface[count.index].access_config[count.index].nat_ip}" ,]
  }
 
 
 
 # Create a new Load Balancer Instance 
  resource "google_compute_instance" "lb_instance" {
+  count        = "${length(var.lb_domains)}"
+  hostname     = "${element(var.lb_domains, count.index)}.devops.rebrain.srwx.net"
   name         = "lb-instance"
   machine_type = "f1-micro"
 
@@ -97,9 +99,7 @@ variable "lb_domains"{
     }
   }
  metadata = {
-#  "ssh-keys" = "${var.ssh_key}"
    sshKeys = "devopbyrebrain_gmail_com:${file(var.ssh_pub_key_filepath)}"
-#   "block-project-ssh-keys" = "false"
 }
 
   provisioner "remote-exec" {
@@ -109,7 +109,7 @@ variable "lb_domains"{
     connection {
       type = "ssh"
       user = "${var.lb_host_user}"
-      host = "${google_compute_instance.lb_instance.network_interface[0].access_config[0].nat_ip}" 
+      host = "${google_compute_instance.lb_instance[count.index].network_interface[count.index].access_config[count.index].nat_ip}" 
       private_key = "${file(var.ssh_pr_key_filepath)}"
     }
  }
@@ -119,14 +119,14 @@ variable "lb_domains"{
 resource "null_resource" "devstxt" {
   count = "${length(var.lb_domains)}"
   provisioner "local-exec" {
-    command = "echo ${google_compute_instance.lb_instance.network_interface[0].access_config[0].nat_ip} ansible_user=${var.lb_host_user} ansible_ssh_private_key_file=${var.ssh_pr_key_filepath} >> nginx/inventory/lb_prod"
+    command = "echo ${google_compute_instance.lb_instance[count.index].network_interface[count.index].access_config[count.index].nat_ip} ansible_user=${var.lb_host_user} ansible_ssh_private_key_file=${var.ssh_pr_key_filepath} >> nginx/inventory/lb_prod"
   }
 
   provisioner "local-exec" {
     command = "ansible-playbook  -i nginx/inventory/lb_prod  python/main.yml" 
 }
   provisioner "local-exec" {
-    command = "ansible-playbook --ask-vault-pass -vi nginx/inventory/lb_prod  nginx/lb.yml  --extra-vars 'nginx_site_name=${var.lb_domains[0]} , backend=${google_compute_instance.web_instance.network_interface[0].network_ip}'" 
+    command = "ansible-playbook  -i nginx/inventory/lb_prod  nginx/lb.yml  --extra-vars 'nginx_site_name=${var.lb_domains[count.index]} , backend=${google_compute_instance.web_instance[count.index].network_interface[count.index].network_ip}' --vault-password-file ~/.ansible_pass.txt" 
   }
 }
 
@@ -138,6 +138,8 @@ resource "null_resource" "devstxt" {
 
 # Create a new Load Web Instance 
  resource "google_compute_instance" "web_instance" {
+  count        = "${length(var.lb_domains)}"
+  hostname     = "${element(var.web_domains, count.index)}.devops.rebrain.srwx.net"
   name         = "web-instance"
   machine_type = "f1-micro"
 
@@ -164,23 +166,23 @@ resource "null_resource" "devstxt" {
     connection {
       type = "ssh"
       user = "${var.web_host_user}"
-      host = "${google_compute_instance.web_instance.network_interface[0].access_config[0].nat_ip}" 
+      host = "${google_compute_instance.web_instance[count.index].network_interface[count.index].access_config[count.index].nat_ip}" 
       private_key = "${file(var.ssh_pr_key_filepath)}"
     }
  }
 }
 
 # Write credentials to file and run ansible
-resource "null_resource" "webdevstxt" {
+resource "null_resource" "a" {
   count = "${length(var.web_domains)}"
   provisioner "local-exec" {
-    command = "echo ${google_compute_instance.web_instance.network_interface[0].access_config[0].nat_ip} ansible_user=${var.web_host_user} ansible_ssh_private_key_file=${var.ssh_pr_key_filepath} >> nginx/inventory/web_prod"
+    command = "echo ${google_compute_instance.web_instance[count.index].network_interface[count.index].access_config[count.index].nat_ip} ansible_user=${var.web_host_user} ansible_ssh_private_key_file=${var.ssh_pr_key_filepath} >> nginx/inventory/web_prod"
   }
 
   provisioner "local-exec" {
     command = "ansible-playbook  -i nginx/inventory/web_prod  python/main.yml" 
 }
   provisioner "local-exec" {
-    command = "ansible-playbook --ask-vault-pass -vi nginx/inventory/web_prod  nginx/web.yml  --extra-vars 'nginx_site_name=${var.web_domains[0]}'" 
+    command = "ansible-playbook  -i nginx/inventory/web_prod  nginx/web.yml  --extra-vars 'nginx_site_name=${var.web_domains[count.index]}' --vault-password-file ~/.ansible_pass.txt" 
   }
 }
