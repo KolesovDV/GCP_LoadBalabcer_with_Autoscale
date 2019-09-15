@@ -1,31 +1,3 @@
-variable "gcp_zone" {}
-variable "gcp_region" {}
-#variable "web_inst_image" {}
-variable "gcp_project" {}
-variable "instance_image" {}
-variable "key_file" {}
-variable "name" {}
-variable "ssh_pub_key_filepath" {
-          type = "string"
-}
-variable "ssh_pr_key_filepath" {
-          type = "string"
-}
-
-variable "instance_host_user" {}
-
-variable "my-access-key"{
-          type = "string"
-}
-variable "my-secret-key"{
-          type = "string"
-}
-
-variable "web_domains"{
-         type = "string"
-        default = "webserver1"
-}
-
 
 # Configure the AWS  Provider
  provider "aws" {
@@ -41,7 +13,6 @@ variable "web_domains"{
   }
 
 # Create DNS records for LB
-
  resource "aws_route53_record" "www" {
   zone_id =  data.aws_route53_zone.rebrain.id #"${var.aws_zoneid}"
   name    =  "${var.name}.devops.rebrain.srwx.net"
@@ -49,14 +20,10 @@ variable "web_domains"{
   ttl     = "300"
   records = ["${google_compute_global_address.default.address}" ]
   depends_on = ["google_compute_global_address.default"]
- }
+} 
 
-
-
-
-
-
- provider "google" {
+#Configure  google provider 
+provider "google" {
   credentials = "${file(var.key_file)}"
   project     = "${var.gcp_project}"
   region      = "${var.gcp_region}"
@@ -78,7 +45,6 @@ resource "google_compute_instance_group" "all" {
 
   instances = [
     "${google_compute_instance.web_instance.self_link}",
-#    "${google_compute_instance.test2.self_link}",
   ]
 
   named_port {
@@ -96,10 +62,9 @@ resource "google_compute_instance_group" "all" {
 
 
 
-
 # Create  Web Instance 
  resource "google_compute_instance" "web_instance" {
-  hostname     = "${var.web_domains}.devops.rebrain.srwx.net"
+  hostname     = "${var.hostname}.devops.rebrain.srwx.net"
   name         = "web-instance"
   machine_type = "f1-micro"
 
@@ -147,7 +112,6 @@ data "google_compute_backend_service" "baz" {
 resource "google_compute_backend_service" "default" {
   name          = "backend-service"
   health_checks = ["${google_compute_http_health_check.default.self_link}"]
-
   backend       { group = "${google_compute_instance_group.all.self_link}"}  
 }
 

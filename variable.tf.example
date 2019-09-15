@@ -1,0 +1,61 @@
+#common variables
+
+variable my-access-key {
+  description = "Acces key to AWS"
+  default =   ""
+}
+
+variable my-secret-key {
+  description = "Secret key to AWS"
+  default     = ""
+}
+
+variable gcp_region {
+  description = "Default region in GCP"
+  default     = ""
+}
+
+variable gcp_zone {
+  description = "Default zone in GCP"
+  default     = ""
+}
+
+variable gcp_project {
+  description = "Project name iin GCP"
+  default     = ""
+}
+
+variable key_file {
+  description  = "File with your GCP account settings"
+  default      = ""
+}
+
+variable ssh_pub_key_filepath {
+  description  = "Path to ssh public key" 
+  default      = ""
+}
+
+variable ssh_pr_key_filepath {
+  description  = "Path to ssh privat key"
+  default      = ""
+}
+variable instance_host_user {
+  description  = "Host username in GCP instance. Need to connect via ssh"
+  default      = ""
+}
+variable instance_image {
+  description  = "OS version to install GCP instance"
+  default      = ""
+}
+
+
+variable name {
+  description  = "variable used in project for naming settings  "
+  default      = "" 
+}
+
+variable hostname {
+  description  = "Hostname GCP instance "
+  default      = "" 
+}
+

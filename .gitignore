@@ -1,3 +1,5 @@
 .terraform
 terraform.tf*
 key.json
+variable.tf
+
