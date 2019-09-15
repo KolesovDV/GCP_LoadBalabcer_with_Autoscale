@@ -16,14 +16,16 @@ Unmanaged instance groups
 Unmanaged instance groups can contain heterogeneous instances that you can arbitrarily add and remove from the group. Unmanaged instance groups do not offer autoscaling, auto-healing, rolling update support, or the use of instance templates and are not a good fit for deploying highly available and scalable workloads. Use unmanaged instance groups if you need to apply load balancing to groups of heterogeneous instances or if you need to manage the instances yourself.
 According to the task “OPS: Ansible 13 Production ready” we are to manage instances using ansible. That’s why we chose “Unmanaged instance groups”. 
 Unlike managed instance groups, unmanaged instance groups are just collections of unique instances that do not share a common instance template. Unmanaged groups do not create, delete, or scale the number of instances in the group.  You simply create a group, and add individual instances to the group later.
-Simple Steps:
-1)Create Instance
-2)Create unmanaged instance group
-3)Create Load Balancer
-3.1)	Create health check( http or/and https)
-3.2) 	Create global address 
-3.3) 	Create backend service using unmanaged group, health check
-3.4) 	Create host and path rule(use backend, url_map, specify path)
-3.5) 	Create ssl sertificate if  nessesary
-3.6) 	Create frontend configuration(using global address create target to proxy and global forwarding rules)
 
+
+## Simple Steps:
+
+- 1)	 Create Instance
+- 2)	 Create unmanaged instance group
+- 3)	 Create Load Balancer	
+- 3.1) 	 Create health check( http or/and https)	
+- 3.2) 	 Create global address	
+- 3.3) 	 Create backend service using unmanaged group, health check	
+- 3.4) 	 Create host and path rule(use backend, url_map, specify path)	
+- 3.5) 	 Create ssl sertificate if  nessesary	
+- 3.6) 	 Create frontend configuration(using global address create target to proxy and global forwarding rules)	
