@@ -1,4 +1,3 @@
-
 # Configure the AWS  Provider
  provider "aws" {
   region     = "us-west-2"
@@ -24,6 +23,14 @@
 
 #Configure  google provider 
 provider "google" {
+  credentials = "${file(var.key_file)}"
+  project     = "${var.gcp_project}"
+  region      = "${var.gcp_region}"
+  zone        = "${var.gcp_zone}"
+ }
+
+#Configure  google-beta provider 
+provider "google-beta" {
   credentials = "${file(var.key_file)}"
   project     = "${var.gcp_project}"
   region      = "${var.gcp_region}"
@@ -99,41 +106,53 @@ depends_on = [google_compute_instance.web_instance]
 }
 
 resource "google_compute_http_health_check" "default" {
-  name    = "instance-hc"
+  name    = "httpinstance-hc"
   request_path = "/"
   port               = 80
   check_interval_sec = 5
   timeout_sec        = 5
 }
 
-data "google_compute_backend_service" "baz" {
-  name = "foobar"
-}
 
 resource "google_compute_backend_service" "default" {
-  name          = "backend-service"
+  name          = "http-backend-service"
   health_checks = ["${google_compute_http_health_check.default.self_link}"]
   backend       { group = "${google_compute_instance_group.all.self_link}"}  
 depends_on = [google_compute_instance_group.all]
 }
 
-resource "google_compute_global_forwarding_rule" "default" {
-  name       = "global-rule"
+resource "google_compute_global_forwarding_rule" "http" {
+  name       = "global-rule-http"
   ip_address = "${google_compute_global_address.default.address}"
   target     = "${google_compute_target_http_proxy.default.self_link}"
   port_range = "80"
   depends_on = [google_compute_global_address.default, google_compute_url_map.default, google_compute_target_http_proxy.default ]
 }
 
+resource "google_compute_global_forwarding_rule" "https" {
+  name       = "global-rule-https"
+  ip_address = "${google_compute_global_address.default.address}"
+  target     = "${google_compute_target_https_proxy.default.self_link}"
+  port_range = "443"
+  depends_on = [google_compute_global_address.default, google_compute_url_map.default, google_compute_target_https_proxy.default ]
+}
 resource "google_compute_target_http_proxy" "default" {
-  name        = "target-proxy"
+  name        = "target-http-proxy"
   description = "a description"
   url_map     = "${google_compute_url_map.default.self_link}"
-  depends_on = [google_compute_url_map.default]
+  depends_on = [google_compute_url_map.default,  google_compute_target_https_proxy.default]
+}
+
+resource "google_compute_target_https_proxy" "default" {
+  name        = "target-https-proxy"
+  description = "description"
+  url_map     = "${google_compute_url_map.default.self_link}"
+  ssl_certificates = ["${google_compute_managed_ssl_certificate.default.self_link}"]
+  depends_on = [google_compute_url_map.default, google_compute_managed_ssl_certificate.default]
 }
 
 resource "google_compute_url_map" "default" {
-  name            = "kolesov-url-map-target-proxy"
+  name            = "kolesov-url-map-target-httpproxy"
   description     = "a description"
   default_service = "${google_compute_backend_service.default.self_link}"
 
@@ -161,6 +180,7 @@ resource "google_compute_url_map" "default" {
 depends_on = [google_compute_backend_service.default]
 }
 
+
 # Write credentials to file and run ansible
 resource "null_resource" "devstxt" {
   provisioner "local-exec" {
@@ -187,3 +207,15 @@ resource  "google_compute_global_address" "default" {
   project    = "${var.gcp_project}"
   name       = "${var.name}-address"
 }
+
+resource "google_compute_managed_ssl_certificate" "default" {
+  provider = "google-beta"
+
+  name = "${var.name}"
+
+  managed {
+    domains = ["${var.name}.devops.rebrain.srwx.net."]
+  }
+}
+
+
