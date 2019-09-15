@@ -1,8 +1,8 @@
 # Configure the AWS  Provider
  provider "aws" {
   region     = "us-west-2"
-  access_key = "${var.my-access-key}"
-  secret_key = "${var.my-secret-key}"
+  access_key = var.my-access-key
+  secret_key = var.my-secret-key
  }
 
 # Configure AWS zone
@@ -24,22 +24,22 @@
 #Configure  google provider 
 provider "google" {
   credentials = "${file(var.key_file)}"
-  project     = "${var.gcp_project}"
-  region      = "${var.gcp_region}"
-  zone        = "${var.gcp_zone}"
+  project     = var.gcp_project
+  region      = var.gcp_region
+  zone        = var.gcp_zone
  }
 
 #Configure  google-beta provider 
 provider "google-beta" {
   credentials = "${file(var.key_file)}"
-  project     = "${var.gcp_project}"
-  region      = "${var.gcp_region}"
-  zone        = "${var.gcp_zone}"
+  project     = var.gcp_project
+  region      = var.gcp_region
+  zone        = var.gcp_zone
  }
 
 data "google_compute_instance_group" "all" {
     name = "instance-group-name"
-    zone = "${var.gcp_zone}"
+    zone = var.gcp_zone
 
 depends_on = [google_compute_instance.web_instance]
 }
@@ -62,7 +62,7 @@ resource "google_compute_instance_group" "all" {
     port = "443"
   }
 
-  zone = "${var.gcp_zone}"
+  zone = var.gcp_zone
 
 depends_on = [google_compute_instance.web_instance]
 
@@ -78,7 +78,7 @@ depends_on = [google_compute_instance.web_instance]
 
   boot_disk {
     initialize_params {
-      image = "${var.instance_image}"
+      image = var.instance_image
     }
   }
 
@@ -98,7 +98,7 @@ depends_on = [google_compute_instance.web_instance]
 
     connection {
       type = "ssh"
-      user = "${var.instance_host_user}"
+      user = var.instance_host_user
       host = "${google_compute_instance.web_instance.network_interface[0].access_config[0].nat_ip}" 
       private_key = "${file(var.ssh_pr_key_filepath)}"
     }
@@ -204,14 +204,14 @@ depends_on = [null_resource.devstxt]
 }
 
 resource  "google_compute_global_address" "default" {
-  project    = "${var.gcp_project}"
+  project    = var.gcp_project
   name       = "${var.name}-address"
 }
 
 resource "google_compute_managed_ssl_certificate" "default" {
   provider = "google-beta"
 
-  name = "${var.name}"
+  name = var.name
 
   managed {
     domains = ["${var.name}.devops.rebrain.srwx.net."]
