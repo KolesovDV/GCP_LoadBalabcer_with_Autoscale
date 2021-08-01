@@ -3,3 +3,4 @@ terraform.tf*
 key.json
 variable.tf
 
+mykey.json
